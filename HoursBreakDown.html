@@ -18,49 +18,93 @@
 <p class="p1"><span class="Apple-converted-space">    </span>&lt;script type="text/javascript" src="https://rally1.rallydev.com/apps/2.0rc2/sdk-debug.js"&gt;&lt;/script&gt;</p>
 <p class="p1">&lt;/head&gt;</p>
 <p class="p1">&lt;body&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;p id="value"&gt;&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;p id="Commit"&gt;&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;p id="Stretch"&gt;&lt;/p&gt;</p>
 <p class="p2"><br></p>
 <p class="p1"><span class="Apple-converted-space">    </span>&lt;script type="text/javascript" src="/apps/1.26/sdk.js?debug=true"&gt;&lt;/script&gt;</p>
 <p class="p1"><span class="Apple-converted-space">    </span>&lt;script type="text/javascript"&gt;</p>
 <p class="p1"><span class="Apple-converted-space">       </span>rally.addOnLoad(</p>
 <p class="p1"><span class="Apple-converted-space">           </span>function mainfunc() {</p>
-<p class="p1"><span class="Apple-converted-space">              </span>console.log("\n\n\n\nThis is the start\n\n\n");</p>
 <p class="p1"><span class="Apple-converted-space">              </span>var rallyDataSource = new rally.sdk.data.RallyDataSource("__WORKSPACE_OID__",</p>
 <p class="p1"><span class="Apple-converted-space">                                                                      </span>"__PROJECT_OID__",</p>
 <p class="p1"><span class="Apple-converted-space">                                                                      </span>"__PROJECT_SCOPING_UP__",</p>
 <p class="p1"><span class="Apple-converted-space">                                                                      </span>"__PROJECT_SCOPING_DOWN__");</p>
 <p class="p2"><span class="Apple-converted-space">              </span></p>
+<p class="p1"><span class="Apple-converted-space">              </span>/* Commit stories */ <span class="Apple-converted-space">             </span></p>
 <p class="p1"><span class="Apple-converted-space">              </span>var commitToDoDev = 0;</p>
 <p class="p1"><span class="Apple-converted-space">              </span>var commitToDoQa = 0;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>var commitStories = 0;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>var commitTasks = 0;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>/* Stretch stories */</p>
+<p class="p1"><span class="Apple-converted-space">              </span>var stretchToDoDev = 0;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>var stretchToDoQa = 0;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>var stretchStories = 0;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>var stretchTasks = 0;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>/* Function to get the stretched Stories from the iteration */</p>
+<p class="p1"><span class="Apple-converted-space">              </span>function getStretchStories(){</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>getStories("Stretch", haveStoriesGetTasksStretch, noStoriesError);</p>
+<p class="p1"><span class="Apple-converted-space">              </span>}</p>
 <p class="p2"><br></p>
 <p class="p1"><span class="Apple-converted-space">              </span>/* Function to get the committed Stories from the iteration */</p>
 <p class="p1"><span class="Apple-converted-space">              </span>function getCommittedStories(){</p>
-<p class="p1"><span class="Apple-converted-space">                 </span>var query = '(((Iteration.StartDate &lt;= today) AND (Iteration.EndDate &gt;= today)) AND (StoryState = "Commit"))';</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>getStories("Commit", haveStoriesGetTasksCommit, noStoriesError);</p>
+<p class="p1"><span class="Apple-converted-space">              </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>/* Helper function to get stories */</p>
+<p class="p1"><span class="Apple-converted-space">              </span>function getStories(searchFor, successFunction, errorFunction){</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>var query = '(((Iteration.StartDate &lt;= today) AND (Iteration.EndDate &gt;= today)) AND (StoryState = "' + searchFor + '"))';</p>
 <p class="p1"><span class="Apple-converted-space">                 </span>var fetchValues = 'Name,ObjectID,Owner,PlanEstimate,RiskofCarryOver,ScheduleState,StoryState,TaskEstimateTotal,TaskRemainingTotal,Tasks'</p>
 <p class="p1"><span class="Apple-converted-space">                 </span>var queryObj = {key: "stories",</p>
 <p class="p1"><span class="Apple-converted-space">                                 </span>type: "hierarchicalrequirement",</p>
 <p class="p1"><span class="Apple-converted-space">                                 </span>query: query,</p>
 <p class="p1"><span class="Apple-converted-space">                                 </span>fetch: fetchValues</p>
 <p class="p1"><span class="Apple-converted-space">                                 </span>};</p>
-<p class="p2"><span class="Apple-converted-space">   </span></p>
-<p class="p1"><span class="Apple-converted-space">                 </span>rallyDataSource.findAll(queryObj, haveStoriesGetTasks, noStoriesError);</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>rallyDataSource.findAll(queryObj, successFunction, errorFunction);</p>
 <p class="p1"><span class="Apple-converted-space">              </span>}</p>
 <p class="p2"><br></p>
 <p class="p1"><span class="Apple-converted-space">              </span>/* Function to iterate through all the stories and find their tasks */</p>
-<p class="p1"><span class="Apple-converted-space">              </span>function haveStoriesGetTasks(results) {</p>
+<p class="p1"><span class="Apple-converted-space">              </span>function haveStoriesGetTasksStretch(results) {</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>stretchStories = results.stories.length;</p>
+<p class="p2"><br></p>
 <p class="p1"><span class="Apple-converted-space">                 </span>for(var i = 0; i &lt; results.stories.length; i++) {</p>
 <p class="p1"><span class="Apple-converted-space">                    </span>var aStory = results.stories[i];</p>
 <p class="p1"><span class="Apple-converted-space">                    </span>var storyTasks = aStory.Tasks;</p>
 <p class="p2"><span class="Apple-converted-space">                    </span></p>
 <p class="p1"><span class="Apple-converted-space">                    </span>for (var j = 0 ; j &lt; storyTasks.length ; j++){</p>
 <p class="p1"><span class="Apple-converted-space">                       </span>var aTask = storyTasks[j];</p>
-<p class="p1"><span class="Apple-converted-space">                       </span>getTaskInfo(aTask.ObjectID);</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>getTaskInfoStretch(aTask.ObjectID);</p>
 <p class="p1"><span class="Apple-converted-space">                    </span>}</p>
 <p class="p1"><span class="Apple-converted-space">                 </span>}</p>
 <p class="p1"><span class="Apple-converted-space">              </span>}</p>
-<p class="p2"><span class="Apple-converted-space">              </span></p>
+<p class="p1"><span class="Apple-converted-space">              </span>/* Function to iterate through all the stories and find their tasks */</p>
+<p class="p1"><span class="Apple-converted-space">              </span>function haveStoriesGetTasksCommit(results) {</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>commitStories = results.stories.length;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                 </span>for(var i = 0; i &lt; results.stories.length; i++) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>var aStory = results.stories[i];</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>var storyTasks = aStory.Tasks;</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>for (var j = 0 ; j &lt; storyTasks.length ; j++){</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>var aTask = storyTasks[j];</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>getTaskInfoCommit(aTask.ObjectID);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>}</p>
+<p class="p2"><br></p>
 <p class="p1"><span class="Apple-converted-space">              </span>/* Function to get the information for a given task */</p>
-<p class="p1"><span class="Apple-converted-space">              </span>function getTaskInfo(taskId){</p>
+<p class="p1"><span class="Apple-converted-space">              </span>function getTaskInfoStretch(taskId){</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>getTaskInfo(taskId, haveTaskCalculateHoursStretch, noTasksError);</p>
+<p class="p1"><span class="Apple-converted-space">              </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>/* Function to get the information for a given task */</p>
+<p class="p1"><span class="Apple-converted-space">              </span>function getTaskInfoCommit(taskId){</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>getTaskInfo(taskId, haveTaskCalculateHoursCommit, noTasksError);</p>
+<p class="p1"><span class="Apple-converted-space">              </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>/* Function to get task info */</p>
+<p class="p1"><span class="Apple-converted-space">              </span>function getTaskInfo(taskId, successFunction, errorFunction){</p>
 <p class="p1"><span class="Apple-converted-space">                 </span>var queryTask = '(ObjectID = ' + taskId + ')';</p>
 <p class="p1"><span class="Apple-converted-space">                 </span>var fetchTask = 'Actuals,Estimate,Name,ObjectID,Owner,State,TaskType,ToDo';</p>
 <p class="p1"><span class="Apple-converted-space">                 </span>var queryTask = {key: "tasks",</p>
@@ -68,11 +112,26 @@
 <p class="p1"><span class="Apple-converted-space">                                  </span>query: queryTask,</p>
 <p class="p1"><span class="Apple-converted-space">                                  </span>fetch: fetchTask</p>
 <p class="p1"><span class="Apple-converted-space">                                  </span>};</p>
-<p class="p1"><span class="Apple-converted-space">                 </span>rallyDataSource.findAll(queryTask, haveTaskCalculateHours, noTasksError);</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>rallyDataSource.findAll(queryTask, successFunction, errorFunction);</p>
 <p class="p1"><span class="Apple-converted-space">              </span>}</p>
 <p class="p2"><br></p>
 <p class="p1"><span class="Apple-converted-space">              </span>/* Function to calculate the hours from the task information */</p>
-<p class="p1"><span class="Apple-converted-space">              </span>function haveTaskCalculateHours(results){</p>
+<p class="p1"><span class="Apple-converted-space">              </span>function haveTaskCalculateHoursStretch(results){</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>var foundTasks = results.tasks;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>var aTask = foundTasks[0];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                 </span>if (aTask.TaskType == "Dev"){</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>stretchToDoDev += aTask.ToDo;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>else if (aTask.TaskType == "QA"){</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>stretchToDoQa += aTask.ToDo;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>stretchTasks++;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>updateDisplayStretch();</p>
+<p class="p1"><span class="Apple-converted-space">              </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>/* Function to calculate the hours from the task information */</p>
+<p class="p1"><span class="Apple-converted-space">              </span>function haveTaskCalculateHoursCommit(results){</p>
 <p class="p1"><span class="Apple-converted-space">                 </span>var foundTasks = results.tasks;</p>
 <p class="p1"><span class="Apple-converted-space">                 </span>var aTask = foundTasks[0];</p>
 <p class="p2"><br></p>
@@ -82,8 +141,8 @@
 <p class="p1"><span class="Apple-converted-space">                 </span>else if (aTask.TaskType == "QA"){</p>
 <p class="p1"><span class="Apple-converted-space">                    </span>commitToDoQa += aTask.ToDo;</p>
 <p class="p1"><span class="Apple-converted-space">                 </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                 </span>console.log(aTask.TaskType + "-" + commitToDoDev + "-" + commitToDoQa);</p>
-<p class="p1"><span class="Apple-converted-space">                 </span>updateDisplay();</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>commitTasks++;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>updateDisplayCommit();</p>
 <p class="p1"><span class="Apple-converted-space">              </span>}</p>
 <p class="p2"><br></p>
 <p class="p1"><span class="Apple-converted-space">              </span>/* Error function when stories could not be retrieved */</p>
@@ -97,13 +156,28 @@
 <p class="p1"><span class="Apple-converted-space">              </span>}</p>
 <p class="p2"><br></p>
 <p class="p1"><span class="Apple-converted-space">              </span>/* Function to update the display on screen */</p>
-<p class="p1"><span class="Apple-converted-space">              </span>function updateDisplay(){</p>
-<p class="p1"><span class="Apple-converted-space">                 </span>var toDisplay = "Committed Dev-QA hours = " + commitToDoDev + "-" + commitToDoQa;</p>
-<p class="p1"><span class="Apple-converted-space">                 </span>document.getElementById("value").innerHTML = toDisplay;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>function updateDisplayCommit(){</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>var toDisplay = "&lt;b&gt;Committed Stories&lt;/b&gt;" + "&lt;br&gt;" +</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>"Number of stories = " + commitStories + "&lt;br&gt;" +</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>"Number of tasks = " + commitTasks + "&lt;br&gt;" +</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>"Dev hours = " + commitToDoDev + "&lt;br&gt;" +</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>"QA hours = " + commitToDoQa + "&lt;br&gt;";</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>document.getElementById("Commit").innerHTML = toDisplay;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>/* Function to update the display on screen */</p>
+<p class="p1"><span class="Apple-converted-space">              </span>function updateDisplayStretch(){</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>var toDisplay = "&lt;b&gt;Stretch Stories&lt;/b&gt;" + "&lt;br&gt;" +</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>"Number of stories = " + stretchStories + "&lt;br&gt;" +</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>"Number of tasks = " + stretchTasks + "&lt;br&gt;" +</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>"Dev hours = " + stretchToDoDev + "&lt;br&gt;" +</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>"QA hours = " + stretchToDoQa + "&lt;br&gt;";</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>document.getElementById("Stretch").innerHTML = toDisplay;</p>
 <p class="p1"><span class="Apple-converted-space">              </span>}</p>
 <p class="p2"><br></p>
 <p class="p1"><span class="Apple-converted-space">              </span>/* code start ! */</p>
 <p class="p1"><span class="Apple-converted-space">              </span>getCommittedStories();</p>
+<p class="p1"><span class="Apple-converted-space">              </span>getStretchStories();</p>
 <p class="p1"><span class="Apple-converted-space">           </span>});</p>
 <p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
 <p class="p2"><br></p>
